@@ -5,7 +5,6 @@ import Combine
 struct ContentView: View {
     @StateObject private var model = CalculatorModel()
 
-    // параметры размера
     private let buttonSize: CGFloat = 80
     private let spacing: CGFloat = 12
 
@@ -14,31 +13,56 @@ struct ContentView: View {
             Color.black.opacity(0.02)
                 .ignoresSafeArea()
 
-            VStack(spacing: spacing) {
-                // Display — теперь такая же ширина, как у ряда кнопок
-                Text(model.display)
-                    .font(.system(size: 36, weight: .semibold, design: .rounded))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.2)
-                    .frame(width: buttonSize * 4 + spacing * 3, height: buttonSize)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(12)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.06)))
-
-                // Buttons grid
+            HStack(spacing: 40) {
+                // Левая часть — калькулятор
                 VStack(spacing: spacing) {
-                    ForEach(ButtonLayout.rows, id: \.self) { row in
-                        HStack(spacing: spacing) {
-                            ForEach(row, id: \.self) { key in
-                                CalculatorButton(
-                                    key: key,
-                                    size: buttonSize,
-                                    spacing: spacing,
-                                    action: { handle(key) }
-                                )
+                    Text(model.display)
+                        .font(.system(size: 36, weight: .semibold, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.2)
+                        .frame(width: buttonSize * 4 + spacing * 3, height: buttonSize)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.06)))
+
+                    VStack(spacing: spacing) {
+                        ForEach(ButtonLayout.rows, id: \.self) { row in
+                            HStack(spacing: spacing) {
+                                ForEach(row, id: \.self) { key in
+                                    CalculatorButton(
+                                        key: key,
+                                        size: buttonSize,
+                                        spacing: spacing,
+                                        action: { handle(key) }
+                                    )
+                                }
                             }
                         }
                     }
+                }
+
+                // Правая часть — история
+                VStack(alignment: .trailing, spacing: 8) {
+                    Text("History")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.primary.opacity(0.6))
+                        .padding(.bottom, 8)
+
+                    ScrollView {
+                        VStack(alignment: .trailing, spacing: 6) {
+                            ForEach(model.history, id: \.self) { entry in
+                                Text(entry)
+                                    .font(.system(size: 24, weight: .medium, design: .rounded))
+                                    .foregroundColor(.primary.opacity(0.9))
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .padding(.vertical, 2)
+                            }
+                        }
+                    }
+                    .frame(width: buttonSize * 4 + spacing * 3, height: buttonSize * 4.5)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.06)))
                 }
             }
             .padding(28)
@@ -82,9 +106,10 @@ struct CalculatorButton: View {
     }
 }
 
-// MARK: - Model (без изменений)
+// MARK: - Model
 final class CalculatorModel: ObservableObject {
     @Published private(set) var display: String = "0"
+    @Published var history: [String] = [] // история вычислений
 
     private var current: Decimal = 0
     private var stored: Decimal? = nil
@@ -129,6 +154,8 @@ final class CalculatorModel: ObservableObject {
         guard let op = currentOperation, let s = stored else { return }
         updateCurrentFromDisplay()
         let result = perform(op, s, current)
+        let expression = "\(formatDecimal(s)) \(op.symbol) \(formatDecimal(current)) = \(formatDecimal(result))"
+        history.insert(expression, at: 0) // добавляем в начало истории
         display = formatDecimal(result)
         stored = nil
         currentOperation = nil
@@ -144,6 +171,7 @@ final class CalculatorModel: ObservableObject {
         userTyping = false
         hasDecimal = false
         display = "0"
+        history.removeAll() // очищаем историю при очистке
     }
 
     func toggleSign() {
@@ -182,6 +210,18 @@ final class CalculatorModel: ObservableObject {
         }
     }
 }
+
+extension Operation {
+    var symbol: String {
+        switch self {
+        case .add: return "+"
+        case .subtract: return "−"
+        case .multiply: return "×"
+        case .divide: return "÷"
+        }
+    }
+}
+
 
 // MARK: - Operation & Keys
 enum Operation {
