@@ -14,7 +14,7 @@ struct ContentView: View {
                 .ignoresSafeArea()
 
             HStack(spacing: 40) {
-                // Левая часть — калькулятор
+                // левая часть (калькулятор)
                 VStack(spacing: spacing) {
                     Text(model.display)
                         .font(.system(size: 36, weight: .semibold, design: .rounded))
@@ -40,30 +40,37 @@ struct ContentView: View {
                         }
                     }
                 }
-
-                // Правая часть — история
-                VStack(alignment: .trailing, spacing: 8) {
-                    Text("History")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.primary.opacity(0.6))
-                        .padding(.bottom, 8)
-
-                    ScrollView {
-                        VStack(alignment: .trailing, spacing: 6) {
-                            ForEach(model.history, id: \.self) { entry in
-                                Text(entry)
-                                    .font(.system(size: 24, weight: .medium, design: .rounded))
-                                    .foregroundColor(.primary.opacity(0.9))
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
-                                    .padding(.vertical, 2)
+                // используем GeometryReader чтобы получить точный размер калькулятора
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear {
+                                // сохраняем высоту для истории
+                                model.calculatorHeight = geo.size.height
                             }
-                        }
                     }
-                    .frame(width: buttonSize * 4 + spacing * 3, height: buttonSize * 4.5)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(12)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.06)))
+                )
+
+                // правая часть (история)
+                ScrollView {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Spacer().frame(height: 20)  //отступ сверху
+                        ForEach(model.history, id: \.self) { entry in
+                            Text(entry)
+                                .font(.system(size: 24, weight: .medium, design: .rounded))
+                                .foregroundColor(.primary.opacity(0.9))
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .padding(.trailing, 22) //отступ справа
+                                .padding(.leading, 22)  //отступ слева
+                        }
+                        Spacer().frame(height: 20)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
+                .frame(width: buttonSize * 4 + spacing * 3, height: model.calculatorHeight)
+                .background(.ultraThinMaterial)
+                .cornerRadius(12)
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.06)))
             }
             .padding(28)
         }
@@ -110,6 +117,7 @@ struct CalculatorButton: View {
 final class CalculatorModel: ObservableObject {
     @Published private(set) var display: String = "0"
     @Published var history: [String] = [] // история вычислений
+    @Published var calculatorHeight: CGFloat = 0
 
     private var current: Decimal = 0
     private var stored: Decimal? = nil
@@ -155,7 +163,7 @@ final class CalculatorModel: ObservableObject {
         updateCurrentFromDisplay()
         let result = perform(op, s, current)
         let expression = "\(formatDecimal(s)) \(op.symbol) \(formatDecimal(current)) = \(formatDecimal(result))"
-        history.insert(expression, at: 0) // добавляем в начало истории
+        history.insert(expression, at: 0) // добавление в начало истории
         display = formatDecimal(result)
         stored = nil
         currentOperation = nil
@@ -171,7 +179,7 @@ final class CalculatorModel: ObservableObject {
         userTyping = false
         hasDecimal = false
         display = "0"
-        history.removeAll() // очищаем историю при очистке
+        history.removeAll() // отчистка истории
     }
 
     func toggleSign() {
