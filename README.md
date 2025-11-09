@@ -1,8 +1,10 @@
 # VisionCalc — Minimalist Calculator for Apple Vision Pro
 
-VisionCalc is a minimalist calculator designed exclusively for the Apple Vision Pro. With its sleek, modern interface, the app offers a clean, distraction-free experience that blends seamlessly with the immersive Vision Pro environment. The dark mode aesthetics and smooth animations make it visually striking yet easy on the eyes, while the intuitive button layout ensures effortless navigation. VisionCalc combines simplicity and elegance, providing a sophisticated tool for everyday calculations.
+VisionCalc is a minimalist calculator designed exclusively for the Apple Vision Pro. With its sleek, modern interface, the app offers a clean, distraction-free experience that blends seamlessly with the immersive Vision Pro environment. VisionCalc combines simplicity and elegance, providing a sophisticated tool for everyday calculations.
 
-<img width="3840" height="2160" alt="screenshot" src="https://github.com/user-attachments/assets/53cb2a05-e230-4788-a806-2c0af3996bf1" />
+<img width="3840" height="2160" alt="screenshot2" src="https://github.com/user-attachments/assets/31db3555-0dd8-49a8-b5c2-1ad7cf3e7341" />
+
+In addition to the calculator, VisionCalc features a history window that keeps track of your past calculations. This makes it easy to review previous results and ensure accuracy, all while maintaining the app's streamlined and intuitive design.
 
 ## Tech Stack
 
