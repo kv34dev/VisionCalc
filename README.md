@@ -17,7 +17,7 @@ In addition to the calculator, VisionCalc features a history window that keeps t
 
 1. Clone this repository:
 ```
-git clone https://github.com/kv34dev/visioncalc
+git clone https://github.com/kv34dev/VisionCalc
 ```
 2. Navigate to the project directory:
 ```
